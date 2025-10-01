@@ -20,7 +20,7 @@ terraform {
 }
 
 resource "azurerm_service_plan" "example" {
-  name                = "user10uut"
+  name                = "user10uut888"
   location            = "westeurope"
   resource_group_name = "rg-10"
   os_type             = "Linux"
