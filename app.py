@@ -1,16 +1,26 @@
-from flask import Flask
+from flask import Flask, request, render_template_string
 
+app = Flask(__name__)
 
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return '''
+    result = None
+    error = None
+    if request.method == 'POST':
+        binary = request.form.get('binary', '').strip()
+        try:
+            if not all(c in '01' for c in binary) or not binary:
+                raise ValueError('Podaj poprawną liczbę binarną!')
+            result = int(binary, 2)
+        except Exception as e:
+            error = str(e)
+    return render_template_string('''
     <!DOCTYPE html>
     <html lang="pl">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Global Azure 2025</title>
+        <title>Konwerter binarny &rarr; dziesiętny</title>
         <style>
             body {
                 background: linear-gradient(135deg, #0078D4 0%, #00B4FF 100%);
@@ -31,16 +41,22 @@ def home():
                 text-align: center;
             }
             h1 {
-                font-size: 2.8rem;
-                margin-bottom: 10px;
+                font-size: 2.2rem;
+                margin-bottom: 18px;
             }
-            p {
-                font-size: 1.3rem;
-                margin-top: 0;
+            form {
+                margin-bottom: 18px;
             }
-            .btn {
-                margin-top: 30px;
-                padding: 12px 32px;
+            input[type="text"] {
+                padding: 10px;
+                font-size: 1.1rem;
+                border-radius: 6px;
+                border: none;
+                margin-right: 10px;
+                width: 180px;
+            }
+            button {
+                padding: 10px 24px;
                 font-size: 1.1rem;
                 background: #fff;
                 color: #0078D4;
@@ -49,38 +65,41 @@ def home():
                 cursor: pointer;
                 transition: background 0.2s;
             }
-            .btn:hover {
+            button:hover {
                 background: #e6e6e6;
             }
-            .school-link {
-                position: fixed;
-                top: 24px;
-                right: 32px;
-                z-index: 100;
-                background: rgba(255,255,255,0.85);
-                color: #0078D4;
-                padding: 10px 22px;
-                border-radius: 8px;
+            .result {
+                font-size: 1.3rem;
                 font-weight: bold;
-                text-decoration: none;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                transition: background 0.2s;
+                margin-top: 10px;
             }
-            .school-link:hover {
-                background: #e6e6e6;
+            .error {
+                color: #ffb3b3;
+                font-weight: bold;
+                margin-top: 10px;
             }
         </style>
     </head>
     <body>
-        <a href="https://zstil.eu" target="_blank" class="school-link">ZSTiL.eu</a>
         <div class="container">
-            <h1>Witaj na Global Azure 2025!</h1>
-            <p>Twoja aplikacja działa poprawnie.<br>Miłego kodowania!</p>
-            <a href="https://globalazure.pl" target="_blank" class="btn">Dowiedz się więcej</a>
+            <h1>Konwerter binarny &rarr; dziesiętny</h1>
+            <form method="post">
+                <input type="text" name="binary" placeholder="np. 101101" autocomplete="off" required>
+                <button type="submit">Przelicz</button>
+            </form>
+            {% if result is not none %}
+                <div class="result">Wynik: {{ result }}</div>
+            {% endif %}
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
         </div>
     </body>
     </html>
-    '''
+    ''', result=result, error=error)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
